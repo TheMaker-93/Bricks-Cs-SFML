@@ -10,7 +10,7 @@ namespace TcGame
     public bool CanMove { get; set; }
 
     private const float speed = 1100f;   // velocidad de movimiento
-    private List<Ball> ballList = new List<Ball>();   // lista de bolas local de la pala
+    public List<Ball> ballList = new List<Ball>();   // lista de bolas local de la pala
 
     private Vector2f ballSpawnVerticalOffest = new Vector2f (0, 25);
 

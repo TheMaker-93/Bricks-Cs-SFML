@@ -1,10 +1,19 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
+using SFML.Audio;
+using System;
 
 namespace TcGame
 {
   public class Brick : StaticActor
   {
+
+    SoundBuffer sfxBrick_1 = new SoundBuffer ("Data/Arkanoid/Sounds/brick01.wav");
+    SoundBuffer sfxBrick_2 = new SoundBuffer ("Data/Arkanoid/Sounds/brick03.wav");
+    SoundBuffer sfxBrick_3 = new SoundBuffer ("Data/Arkanoid/Sounds/brick03.wav");
+    SoundBuffer sfxBrick_4 = new SoundBuffer ("Data/Arkanoid/Sounds/brick04.wav");
+    Sound sfx;
+
     /// <summary>
     /// Material of the brick
     /// </summary>
@@ -50,6 +59,7 @@ namespace TcGame
         collision = true;
         ball.Forward = new Vector2f(ball.Forward.X, -ball.Forward.Y);
         ball.Position = new Vector2f(ball.Position.X, myBounds.Top + myBounds.Height + ballBounds.Height / 2.0f);
+
       }
       else if (myBounds.Contains(bottom.X, bottom.Y))
       {
@@ -73,6 +83,29 @@ namespace TcGame
         ball.Position = new Vector2f(myBounds.Left + myBounds.Width + ballBounds.Width / 2.0f, ball.Position.Y);
       }
 
+      // SONIDO DE COLISION BOLA-LKADRILLO
+      if (collision == true) {
+
+        Random alea = new Random ();
+
+        switch (alea.Next (1, 5)) {
+        case 1:
+          sfx = new Sound (sfxBrick_1);
+          break;
+        case 2:
+          sfx = new Sound (sfxBrick_2);
+          break;
+        case 3:
+          sfx = new Sound (sfxBrick_3);
+          break;
+        case 4:
+          sfx = new Sound (sfxBrick_4);
+          break;
+        }
+
+        sfx.Play ();
+      }
+
       if (collision && material.CanBeDestroyed)
       {
         if (!broken && material.CanBeBroken)
@@ -83,6 +116,7 @@ namespace TcGame
         }
         else
         {
+          MyGame.Get.HUD.NumPoints += 5;      // sumamos puntuacion
           Destroy();
         }
       }

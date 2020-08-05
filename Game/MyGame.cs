@@ -1,5 +1,6 @@
 ﻿using SFML.Window;
 using SFML.Audio;
+using System;
 
 namespace TcGame
 {
@@ -8,6 +9,11 @@ namespace TcGame
 
     // musica
     Music gameMusic = new Music ("Data/Arkanoid/Music/arkanoid2012beta.wav");
+
+    // sonidos
+    SoundBuffer sfxBomb_1 = new SoundBuffer ("Data/Arkanoid/Sounds/bomb01.wav");
+    SoundBuffer sfxBomb_2 = new SoundBuffer ("Data/Arkanoid/Sounds/bomb02.wav");
+    Sound sfx;
 
     /// <summary>
     /// Game States
@@ -115,7 +121,6 @@ namespace TcGame
         case State.Playing:
           {
             Playing(dt);
-          // creamos una nueva bola
 
             break;
           }
@@ -145,25 +150,35 @@ namespace TcGame
     private void ChangeState(State newState)
     {
       // Exit state logic
-      if (currentState == State.None)
-      {
-        HUD = Engine.Get.Scene.Create<HUD>();
-      }
-      else if (currentState == State.WaitingToStart)
-      {
+      if (currentState == State.None) {
+        HUD = Engine.Get.Scene.Create<HUD> ();
+      } else if (currentState == State.WaitingToStart) {
         // HUD
-        HUD.HideInfo();
+        HUD.HideInfo ();
 
-      }
-      else if (currentState == State.Playing)
-      {
-        
-      }
-      else if (currentState == State.GameOver)
-      {
-        Engine.Get.Scene.Destroy(brickWall);
-        DestroyAll<Brick>();
+      } else if (currentState == State.Playing) {
+        // reproducimos el sonido de explosion al salir de esta escena
+        Random alea = new Random ();
+        switch (alea.Next (1, 3)) {
+        case 1:
+          sfx = new Sound (sfxBomb_1);
+          break;
+        case 2:
+          sfx = new Sound (sfxBomb_2);
+          break;
+        }
+        sfx.Play ();
+
+      } else if (currentState == State.GameOver) {
+        Engine.Get.Scene.Destroy (brickWall);
+        DestroyAll<Brick> ();
         brickWall = null;
+      } else if (currentState == State.WaitingForBall) {
+        
+        float skipTime = 1.0f;
+
+       
+
       }
 
       //-----------------------------------------------------------
@@ -197,6 +212,19 @@ namespace TcGame
       }
       else if (newState == State.WaitingForBall)
       {
+        // DESTRUIMOS LOS GIFS
+        foreach (Gift g in Engine.Get.Scene.GetAll<Gift> ()) {
+          g.Destroy ();
+        }
+        // DESTRUIMOS LAS BOLAS DE LA ESCENA
+        foreach (Ball b in Engine.Get.Scene.GetAll<Ball> ()) {
+          b.Destroy ();
+        }
+        // DESTRUIMOS LAS BOLAS DE LA PALA
+        foreach (Ball b in Engine.Get.Scene.GetFirst<Pad> ().ballList) {
+          b.Destroy ();
+        }
+
 
       }
       else if (newState == State.GameOver)
@@ -228,7 +256,10 @@ namespace TcGame
     /// </summary>
     private void WaitingForBall(float dt)
     {
+      float skipTime = 1.0f;
+      skipTime -= dt;
 
+      if (skipTime <= 0f) ChangeState (State.Playing);
     }
 
     /// <summary>
@@ -246,6 +277,12 @@ namespace TcGame
     {
       var actors = Engine.Get.Scene.GetAll<T>();
       actors.ForEach(x => x.Destroy());
+    }
+
+    // guarradas
+    public void ChangeStateToWaitingForBall ()
+    {
+      ChangeState (State.WaitingForBall);
     }
   }
 }
